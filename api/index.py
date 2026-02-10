@@ -16,6 +16,7 @@ usage_counts: Dict[str, int] = {}
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_BYTES = 5 * 1024 * 1024  # 5MB
+FREE_LIMIT = 1  # Free users get 1 analysis
 
 
 def get_jwks_url() -> str:
@@ -72,7 +73,12 @@ def usage(decoded: dict = Depends(verify_token)):
     user_id = decoded["sub"]
     tier = get_tier(decoded)
     used = usage_counts.get(user_id, 0)
-    return {"tier": tier, "used": used, "limit": None if tier == "premium" else 3}
+
+    return {
+        "tier": tier,
+        "used": used,
+        "limit": None if tier == "premium" else FREE_LIMIT,
+    }
 
 
 @app.post("/api/analyze")
@@ -85,17 +91,21 @@ async def analyze(
 
     # Tiered limits (free = 1 per session, premium = unlimited)
     used = usage_counts.get(user_id, 0)
-    if tier != "premium" and used >= 3:
+    if tier != "premium" and used >= FREE_LIMIT:
+        limit_text = "analysis" if FREE_LIMIT == 1 else "analyses"
         raise HTTPException(
             status_code=429,
-            detail="Free tier limit reached (3 analysis per session). Upgrade to premium for unlimited analyses.",
+            detail=f"Free tier limit reached ({FREE_LIMIT} {limit_text} per session). Upgrade to premium for unlimited analyses.",
         )
 
     # Validate file extension
     filename = (file.filename or "").lower()
     ext = "." + filename.split(".")[-1] if "." in filename else ""
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: jpg, jpeg, png, webp.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Allowed: jpg, jpeg, png, webp.",
+        )
 
     # Validate size
     data = await file.read()
@@ -108,29 +118,30 @@ async def analyze(
     prompt = "Describe this image in detail, including objects, colors, mood, and any notable features."
 
     try:
-        resp = client.responses.create(
+        resp = client.chat.completions.create(
             model="gpt-4o-mini",
-            input=[
+            messages=[
                 {
                     "role": "user",
                     "content": [
-                        {"type": "input_text", "text": prompt},
-                        {"type": "input_image", "image_url": data_url},
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": data_url}},
                     ],
                 }
             ],
         )
-        description = (resp.output_text or "").strip()
+        description = resp.choices[0].message.content.strip()
         if not description:
             raise RuntimeError("Empty model response")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Vision analysis failed: {str(e)}")
 
+    # Increment usage AFTER successful analysis
     usage_counts[user_id] = used + 1
 
     return {
         "tier": tier,
         "used": usage_counts[user_id],
-        "limit": None if tier == "premium" else 1,
+        "limit": None if tier == "premium" else FREE_LIMIT,
         "description": description,
     }
