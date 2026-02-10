@@ -72,7 +72,7 @@ def usage(decoded: dict = Depends(verify_token)):
     user_id = decoded["sub"]
     tier = get_tier(decoded)
     used = usage_counts.get(user_id, 0)
-    return {"tier": tier, "used": used, "limit": None if tier == "premium" else 1}
+    return {"tier": tier, "used": used, "limit": None if tier == "premium" else 3}
 
 
 @app.post("/api/analyze")
@@ -85,7 +85,7 @@ async def analyze(
 
     # Tiered limits (free = 1 per session, premium = unlimited)
     used = usage_counts.get(user_id, 0)
-    if tier != "premium" and used >= 1:
+    if tier != "premium" and used >= 3:
         raise HTTPException(
             status_code=429,
             detail="Free tier limit reached (1 analysis per session). Upgrade to premium for unlimited analyses.",
