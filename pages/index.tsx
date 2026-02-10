@@ -106,7 +106,7 @@ export default function Home() {
                 <li>Priority processing</li>
                 <li>Priority support</li>
               </ul>
-              <p className="mt-4 text-slate-600">Example: $9.99/month</p>
+              <p className="mt-4 text-slate-600">$9.99/month</p>
             </div>
           </div>
         </section>
