@@ -64,7 +64,7 @@ export default function AnalyzePage() {
     } catch (e: any) {
       setError(e?.message ?? "Failed to fetch usage");
     } finally {
-      setLoadingUsage(fae);
+      setLoadingUsage(fal);
     }
   }
 
@@ -139,7 +139,7 @@ export default function AnalyzePage() {
           </div>
         </header>
 
-        <section className="-8 grid gap-6 md:grid-cols-2">
+        <section className="m8 grid gap-6 md:grid-cols-2">
           {/* Upload */}
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Upload an image</h2>
@@ -194,7 +194,7 @@ export default function AnalyzePage() {
           </div>
 
           {/* Result */}
-          <div className=nded-2xl bg-white p-6 shadow-sm">
+          <div className="ded-2xl bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Result</h2>
             <p className="mt-1 text-sm text-slate-600">
               The AI-generated description will appear here.
