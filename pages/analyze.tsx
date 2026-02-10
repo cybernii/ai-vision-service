@@ -64,7 +64,7 @@ export default function AnalyzePage() {
     } catch (e: any) {
       setError(e?.message ?? "Failed to fetch usage");
     } finally {
-      setLoadingUsage(fal);
+      setLoadingUsage(false);
     }
   }
 
