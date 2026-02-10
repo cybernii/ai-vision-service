@@ -88,7 +88,7 @@ async def analyze(
     if tier != "premium" and used >= 3:
         raise HTTPException(
             status_code=429,
-            detail="Free tier limit reached (1 analysis per session). Upgrade to premium for unlimited analyses.",
+            detail="Free tier limit reached (3 analysis per session). Upgrade to premium for unlimited analyses.",
         )
 
     # Validate file extension
