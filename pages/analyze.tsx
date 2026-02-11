@@ -239,7 +239,7 @@ export default function AnalyzePage() {
               <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-100">
                 <div className="font-semibold">Free tier limit reached</div>
                 <div className="mt-1 text-amber-800">
-                  You can analyze <span className="font-medium">3 image per session</span>.
+                  You can analyze <span className="font-medium">1 image per session</span>.
                   Upgrade to Premium for unlimited analyses.
                 </div>
               </div>
